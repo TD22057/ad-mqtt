@@ -1,0 +1,58 @@
+homeassistant/<component>/[<node_id>/]<object_id>/config
+
+component: binary_sensor, sensor, alarm_control_panel
+node_id: optional grouping string
+object_id: devicde ID (not entity_id)
+
+If have unique id, set that to object_id and omit node_id
+
+Devices:
+- switch: chime on/off
+- ?switch: bypass before alarm on/off?
+- binary_sensors: all zones
+- sensors: RF zone battery level
+- sensor: panel text
+- alarm_control_panel: main panel
+
+examples:
+
+binary_sensor:
+   topic: homeassistant/binary_sensor/alarm_front_door/config
+   Payload: {
+      "name": "Front door",
+      "object_id": "front_door",
+      "unique_id" : "alarm_front_door",
+      "device_class": "door",
+      "state_topic": "alarm/sensor/front_door/state"
+      }
+
+sensor:
+   topic: homeassistant/sensor/alarm_front_door_battery/config
+   Payload: {
+      "name": "Front door battery",
+      "object_id": "front_door_battery",
+      "unique_id" : "alarm_front_door_battery",
+      "device_class": "battery",
+      "unit_of_measurement": "%",
+      "state_topic": "alarm/sensor/front_door/battery"
+      }
+
+alarm_control_panel:
+   state_topic: "alarm/panel/state"
+   value_template: "{{value_json.state}}"
+   command_topic: "alarm/panel/set"
+   command_template
+   code
+   code_arm_required
+   code_disarm_required
+   code_trigger_required
+
+sensor panel message:
+   state_topic: "alarm/panel/message"
+   value_template: "{{value_json.panel}}"
+   need extra attributes like:
+      ac_power
+      battery_low
+      check_zone
+      ready
+      zone_bypassed
