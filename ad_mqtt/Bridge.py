@@ -37,12 +37,12 @@ class Bridge:
             if "rf_id" not in info:
                 continue
 
-            info["rf_id"] = int(info["rf_id"])
+            rf_id = int(info["rf_id"])
+            info["rf_id"] = rf_id
             info["zone"] = zone
-            self.rf_map[info["rf_id"]] : info
+            self.rf_map[rf_id] = info
 
         mqtt.signal_connected.connect(self.mqtt_connected)
-        decoder.signal_connected.connect(self.ad_connected)
 
     def mqtt_connected(self, device, connected):
         if not connected:
@@ -258,6 +258,7 @@ class Bridge:
         LOG.info("on_rfx_message '%s'", message)
 
         serial = int(message.serial_number)
+        LOG.debug( "Checking: %s", serial)
         info = self.rf_map.get(serial)
         if info is None:
             LOG.debug( "Ignoring unknown RF serial number %s",
