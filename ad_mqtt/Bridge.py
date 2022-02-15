@@ -4,6 +4,7 @@ import logging
 
 LOG = logging.getLogger(__name__)
 
+
 class Bridge:
     def __init__(self, mqtt, decoder, zone_data, code):
         self.mqtt = mqtt
@@ -23,6 +24,7 @@ class Bridge:
         self.panel_msg_topic = "alarm/panel/message"
         self.panel_faulted_topic = "alarm/panel/faulted"
         self.panel_battery_topic = "alarm/panel/battery"
+        self.panel_bypass_topic = "alarm/panel/bypass"
 
         self.chime_state_topic = "alarm/panel/chime/state"
         self.chime_set_topic = "alarm/panel/chime/set"
@@ -87,7 +89,7 @@ class Bridge:
             LOG.error("Invalid alarm action '%s'", action)
             return
 
-        LOG.info("Arm code: '%s'",keys)
+        LOG.info("Arm code: '%s'", keys)
         self.ad.send(keys)
 
     def cb_chime_set(self, client, user_data, message):
@@ -120,7 +122,7 @@ class Bridge:
         LOG.info("Read bypass set '%s'", msg)
         self.bypass = (msg.lower() == "on")
 
-        payload = { "status" : "ON" if self.bypass else "OFF" }
+        payload = {"status" : "ON" if self.bypass else "OFF"}
         self.publish(self.bypass_state_topic, {}, payload)
 
     def publish(self, topic, topic_args, payload_args, zone=None):
@@ -145,12 +147,12 @@ class Bridge:
     def on_arm(self, dev, stay):
         LOG.debug("on_arm %s", stay)
 
-        payload = { "status" : "armed_home" }
+        payload = {"status" : "armed_home"}
         self.publish(self.panel_state_topic, {}, payload)
 
     def on_disarm(self, dev):
         LOG.info("on_disarm")
-        payload = { "status" : "disarmed" }
+        payload = {"status" : "disarmed"}
         self.publish(self.panel_state_topic, {}, payload)
 
     def on_power_changed(self, dev, status):
@@ -175,13 +177,13 @@ class Bridge:
                 }
             self.publish(self.panel_faulted_topic, {}, payload, zone=zone)
 
-        payload = { "status" : "triggered" }
+        payload = {"status" : "triggered"}
         self.publish(self.panel_state_topic, {}, payload, zone=zone)
 
     def on_alarm_restored(self, dev, zone, user=None):
         LOG.info("on_alarm_restored zone: %s", zone)
 
-        payload = { "status" : "disarmed" }
+        payload = {"status" : "disarmed"}
         self.publish(self.panel_state_topic, {}, payload, zone=zone)
 
         payload = {
@@ -199,7 +201,7 @@ class Bridge:
         # status == bool
         LOG.info("on_bypass %s zone=%s", status, zone)
 
-        payload = { "status" : "ON" if status else "OFF" }
+        payload = {"status" : "ON" if status else "OFF"}
         self.publish(self.panel_bypass_topic, {}, payload, zone=zone)
 
     def on_boot(self, dev):
@@ -207,18 +209,18 @@ class Bridge:
 
     def on_zone_fault(self, dev, zone):
         LOG.info("on_zone_fault %s", zone)
-        payload = { "status" : "ON" }
+        payload = {"status" : "ON"}
         self.publish(self.sensor_state_topic, {}, payload, zone=zone)
 
     def on_zone_restore(self, dev, zone):
         LOG.info("on_zone_restored %s", zone)
 
-        payload = { "status" : "OFF" }
+        payload = {"status" : "OFF"}
         self.publish(self.sensor_state_topic, {}, payload, zone=zone)
 
     def on_low_battery(self, dev, status):
         # status = bool
-        payload = { "status" : 10 if status else 100 }
+        payload = {"status" : 10 if status else 100}
         self.publish(self.panel_battery_topic, {}, payload)
 
     def on_panic(self, dev, status):
@@ -230,7 +232,7 @@ class Bridge:
 
     def on_chime_changed(self, dev, status):
         # status = bool
-        payload = { "status" : "ON" if status else "OFF" }
+        payload = {"status" : "ON" if status else "OFF"}
         self.publish(self.chime_state_topic, {}, payload)
 
     def on_message(self, dev, message):
@@ -248,7 +250,7 @@ class Bridge:
             "zone_bypassed": message.zone_bypassed,
             }
 
-        payload = { "status" : message.text.strip(), "attr" : self.panel_attr }
+        payload = {"status" : message.text.strip(), "attr" : self.panel_attr}
         self.publish(self.panel_msg_topic, {}, payload)
 
         # If there is a pending chime state request, process it now that we
@@ -266,16 +268,16 @@ class Bridge:
         LOG.info("on_rfx_message '%s'", message)
 
         serial = int(message.serial_number)
-        LOG.debug( "Checking: %s", serial)
+        LOG.debug("Checking: %s", serial)
         info = self.rf_map.get(serial)
         if info is None:
-            LOG.debug( "Ignoring unknown RF serial number %s",
-                       message.serial_number)
+            LOG.debug("Ignoring unknown RF serial number %s",
+                      message.serial_number)
             return
 
         if message.value is not None:
             is_low_battery = bool(message.value & 0x02)
-            payload = { "status" : 10 if is_low_battery else 100 }
+            payload = {"status" : 10 if is_low_battery else 100}
             self.publish(self.sensor_battery_topic, {}, payload,
                          zone=info["zone"])
 

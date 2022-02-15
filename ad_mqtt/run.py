@@ -5,6 +5,7 @@ from .Bridge import Bridge
 from .Client import Client
 from .Discovery import Discovery
 
+
 def run(host, port, alarm_code, zone_data,
         log_level=logging.INFO, log_screen=True, log_file=None):
     fmt = '%(asctime)s.%(msecs)03d %(levelname)s %(module)s: %(message)s'
@@ -30,8 +31,8 @@ def run(host, port, alarm_code, zone_data,
             log.addHandler(file_handler)
 
     # Alarm decoder network device.
-    adClient = Client( host, port )
-    decoder = AD.AlarmDecoder( adClient )
+    adClient = Client(host, port)
+    decoder = AD.AlarmDecoder(adClient)
     decoder._wire_events()
 
     mqttClient = IM.network.Mqtt()
