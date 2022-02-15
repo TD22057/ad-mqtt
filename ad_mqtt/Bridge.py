@@ -22,6 +22,7 @@ class Bridge:
         self.panel_set_topic = "alarm/panel/set"
         self.panel_msg_topic = "alarm/panel/message"
         self.panel_faulted_topic = "alarm/panel/faulted"
+        self.panel_battery_topic = "alarm/panel/battery"
 
         self.chime_state_topic = "alarm/panel/chime/state"
         self.chime_set_topic = "alarm/panel/chime/set"
@@ -97,12 +98,20 @@ class Bridge:
         self.set_chime(chime_on)
 
     def set_chime(self, chime_on):
+        # If we know the chime state, then we can test whether the request is
+        # a change or not.  Need this because the chime state MQTT message
+        # will have retain=T and every time we start up we'll get it but we
+        # only want to change the chime state if it's actually different
+        # because the chime command is a toggle - not a set and we could
+        # toggle it the wrong way.
         if "chime_on" in self.panel_attr:
             if chime_on != self.panel_attr.get("chime_on", False):
                 LOG.info("Toggling chime status")
                 self.ad.send(self.code + "9")
 
             self.req_chime_on = None
+
+        # Pend the request until we know the chime state.
         else:
             self.req_chime_on = chime_on
 
@@ -208,7 +217,9 @@ class Bridge:
         self.publish(self.sensor_state_topic, {}, payload, zone=zone)
 
     def on_low_battery(self, dev, status):
-        pass
+        # status = bool
+        payload = { "status" : 10 if status else 100 }
+        self.publish(self.panel_battery_topic, {}, payload)
 
     def on_panic(self, dev, status):
         # status == bool
@@ -218,13 +229,12 @@ class Bridge:
         pass
 
     def on_chime_changed(self, dev, status):
-        # message.chime_status
-        pass
+        # status = bool
+        payload = { "status" : "ON" if status else "OFF" }
+        self.publish(self.chime_state_topic, {}, payload)
 
     def on_message(self, dev, message):
         LOG.info("on_message '%s'", message)
-
-        prev_chime = self.panel_attr.get("chime_on", -1)
         self.panel_attr = {
             "ac_power_on": message.ac_power,
             "alarm_event_occurred": message.alarm_event_occurred,
@@ -241,10 +251,8 @@ class Bridge:
         payload = { "status" : message.text.strip(), "attr" : self.panel_attr }
         self.publish(self.panel_msg_topic, {}, payload)
 
-        if prev_chime != self.panel_attr["chime_on"]:
-            payload = { "status" : "ON" if message.chime_on else "OFF" }
-            self.publish(self.chime_state_topic, {}, payload)
-
+        # If there is a pending chime state request, process it now that we
+        # know the current chime state.
         if self.req_chime_on is not None:
             self.set_chime(self.req_chime_on)
 

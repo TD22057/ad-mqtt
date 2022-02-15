@@ -6,7 +6,7 @@ class Discovery:
         mqtt.signal_connected.connect(self.mqtt_connected)
         self.messages = []
 
-        topic = ('homeassistant/alarm_control_panel/admqtt_alarm_panel/config')
+        topic = 'homeassistant/alarm_control_panel/admqtt_alarm_panel/config'
         payload = {
             'object_id' : 'alarm_panel_mqtt',
             'unique_id' : 'admqtt_alarm_panel',
@@ -27,8 +27,21 @@ class Discovery:
             }
         self.messages.append( (topic, payload) )
 
+        # TODO: create last updated time sensors for everything since HA
+        # doesn't save that information.
+
         # TODO: create main panel battery sensor
-        # TODO: create last updated time sensors for everything.
+        topic = 'homeassistant/sensor/admqtt_alarm_panel_battery/config'
+        payload = {
+            'name' : "Alarm Panel Battery",
+            'object_id' : "alarm_panel_battery",
+            'unique_id' : "admqtt_alarm_panel_battery",
+            'state_topic' : bridge.panel_battery_topic,
+            'value_template' : '{{value_json.status}}',
+            'unit_of_measurement': '%',
+            'device_class' : 'battery',
+            }
+        self.messages.append( (topic, payload) )
 
         # Ideally this would be an attribute of the alarm panel but that's
         # pulling attributes from the message.  Should probably process the
@@ -123,8 +136,6 @@ class Discovery:
                     'device_class' : 'battery',
                     }
                 self.messages.append( (topic, payload) )
-
-        # TODO: add last seen sensor messages.
 
     def mqtt_connected(self, device, connected):
         if not self.messages:
