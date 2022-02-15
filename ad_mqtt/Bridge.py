@@ -236,6 +236,12 @@ class Bridge:
         self.publish(self.chime_state_topic, {}, payload)
 
     def on_message(self, dev, message):
+        # first call: update sensor states
+        if not self.panel_attr:
+            self.on_chime_changed(dev, message.chime_on)
+            self.on_bypass(dev, message.zone_bypassed)
+            self.on_low_battery(dev, message.battery_low)
+
         LOG.info("on_message '%s'", message)
         self.panel_attr = {
             "ac_power_on": message.ac_power,
