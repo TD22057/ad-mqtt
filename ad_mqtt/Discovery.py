@@ -1,5 +1,6 @@
 import json
 
+
 class Discovery:
     def __init__(self, mqtt, bridge, zone_data):
         self.mqtt = mqtt
@@ -25,12 +26,12 @@ class Discovery:
             'json_attributes_template' : '{{value_json.attr | tojson}}',
             'qos' : 1,
             }
-        self.messages.append( (topic, payload) )
+        self.messages.append((topic, payload))
 
         # TODO: create last updated time sensors for everything since HA
         # doesn't save that information.
 
-        # TODO: create main panel battery sensor
+        # main panel battery sensor
         topic = 'homeassistant/sensor/admqtt_alarm_panel_battery/config'
         payload = {
             'name' : "Alarm Panel Battery",
@@ -41,7 +42,18 @@ class Discovery:
             'unit_of_measurement': '%',
             'device_class' : 'battery',
             }
-        self.messages.append( (topic, payload) )
+        self.messages.append((topic, payload))
+
+        # bypass state sensor
+        topic = 'homeassistant/binary_sensor/admqtt_alarm_panel_bypass/config'
+        payload = {
+            'name' : "Alarm Panel Bypass",
+            'object_id' : "alarm_panel_bypass",
+            'unique_id' : "admqtt_alarm_panel_bypass",
+            'state_topic' : bridge.panel_bypass_topic,
+            'value_template' : '{{value_json.status}}',
+            }
+        self.messages.append((topic, payload))
 
         # Ideally this would be an attribute of the alarm panel but that's
         # pulling attributes from the message.  Should probably process the
@@ -58,10 +70,10 @@ class Discovery:
             'value_template' : '{{value_json.status}}',
             'json_attributes_topic' : bridge.panel_faulted_topic,
             'json_attributes_template' :
-               ( '{ "zone_num" : {{value_json.zone_num}},'
+               ('{ "zone_num" : {{value_json.zone_num}},'
                  '"entity" : "{{value_json.entity}}" }'),
             }
-        self.messages.append( (topic, payload) )
+        self.messages.append((topic, payload))
 
         topic = 'homeassistant/sensor/admqtt_alarm_panel_message/config'
         payload = {
@@ -72,7 +84,7 @@ class Discovery:
             'state_topic' : bridge.panel_msg_topic,
             'value_template' : '{{value_json.status}}',
             }
-        self.messages.append( (topic, payload) )
+        self.messages.append((topic, payload))
 
         topic = 'homeassistant/switch/admqtt_alarm_panel_chime/config'
         payload = {
@@ -85,7 +97,7 @@ class Discovery:
             'command_topic' : bridge.chime_set_topic,
             'qos' : 1,
             }
-        self.messages.append( (topic, payload) )
+        self.messages.append((topic, payload))
 
         topic = 'homeassistant/switch/admqtt_alarm_panel_bypass/config'
         payload = {
@@ -99,7 +111,7 @@ class Discovery:
             'qos' : 1,
             'retain' : True,
             }
-        self.messages.append( (topic, payload) )
+        self.messages.append((topic, payload))
 
         for info in zone_data.values():
             entity = info['entity']
@@ -119,7 +131,7 @@ class Discovery:
                 payload['device_class'] = 'window'
             elif 'door' in entity.lower():
                 payload['device_class'] = 'door'
-            self.messages.append( (topic, payload) )
+            self.messages.append((topic, payload))
 
             if has_battery:
                 bat_entity = entity + '_battery'
@@ -135,7 +147,7 @@ class Discovery:
                     'unit_of_measurement': '%',
                     'device_class' : 'battery',
                     }
-                self.messages.append( (topic, payload) )
+                self.messages.append((topic, payload))
 
     def mqtt_connected(self, device, connected):
         if not self.messages:
