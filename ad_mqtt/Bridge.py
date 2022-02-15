@@ -14,9 +14,10 @@ class Bridge:
         self.retain = True
         self.zone_data = zone_data
         self.panel_attr = {}
+        self.is_armed = None
+        self.is_bypass = False
 
         self.code = code
-        self.bypass = False
         self.req_chime_on = None
 
         self.panel_state_topic = "alarm/panel/state"
@@ -74,7 +75,7 @@ class Bridge:
 
         # TODO: how to report error message?
         keys = ""
-        if self.bypass:
+        if self.is_bypass:
             keys = f"{self.code}6#"
 
         if action == "arm_away":
@@ -120,9 +121,9 @@ class Bridge:
     def cb_bypass_set(self, client, user_data, message):
         msg = message.payload.decode("utf-8").strip()
         LOG.info("Read bypass set '%s'", msg)
-        self.bypass = (msg.lower() == "on")
+        self.is_bypass = (msg.lower() == "on")
 
-        payload = {"status" : "ON" if self.bypass else "OFF"}
+        payload = {"status" : "ON" if self.is_bypass else "OFF"}
         self.publish(self.bypass_state_topic, {}, payload)
 
     def publish(self, topic, topic_args, payload_args, zone=None):
@@ -146,12 +147,15 @@ class Bridge:
 
     def on_arm(self, dev, stay):
         LOG.debug("on_arm %s", stay)
+        self.is_armed = True
 
-        payload = {"status" : "armed_home"}
+        payload = {"status" : "armed_home" if stay else "armed_away"}
         self.publish(self.panel_state_topic, {}, payload)
 
     def on_disarm(self, dev):
         LOG.info("on_disarm")
+        self.is_armed = False
+
         payload = {"status" : "disarmed"}
         self.publish(self.panel_state_topic, {}, payload)
 
@@ -263,6 +267,14 @@ class Bridge:
         # know the current chime state.
         if self.req_chime_on is not None:
             self.set_chime(self.req_chime_on)
+
+        # Update the panel state if this is the first call we've seen.
+        if self.is_armed is None:
+            self.is_armed = message.armed_away or message.armed_home
+            if self.is_armed:
+                self.on_arm(dev, stay=message.armed_home)
+            else:
+                self.on_disarm(dev)
 
     def on_expander_message(self, dev, message):
         pass
