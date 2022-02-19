@@ -14,8 +14,9 @@ class Bridge:
         self.retain = True
         self.zone_data = zone_data
         self.panel_attr = {}
-        self.is_armed = None
+        self.panel_status = None
         self.is_bypass = False
+        self.last_alarm_zone = ""
 
         self.code = code
         self.req_chime_on = None
@@ -147,17 +148,11 @@ class Bridge:
 
     def on_arm(self, dev, stay):
         LOG.debug("on_arm %s", stay)
-        self.is_armed = True
-
-        payload = {"status" : "armed_home" if stay else "armed_away"}
-        self.publish(self.panel_state_topic, {}, payload)
+        self._update_panel_status("armed_home" if stay else "armed_away")
 
     def on_disarm(self, dev):
         LOG.info("on_disarm")
-        self.is_armed = False
-
-        payload = {"status" : "disarmed"}
-        self.publish(self.panel_state_topic, {}, payload)
+        self._update_panel_status("disarmed")
 
     def on_power_changed(self, dev, status):
         # message.ac_power
@@ -174,28 +169,14 @@ class Bridge:
         if not info:
             LOG.error("Skipping unknown zone %s", zone)
         else:
-            payload = {
-                "status" : info["label"],
-                "entity" : info["entity"],
-                "zone_num" : info["zone_num"],
-                }
-            self.publish(self.panel_faulted_topic, {}, payload, zone=zone)
+            self.last_alarm_zone = info["entity"]
 
-        payload = {"status" : "triggered"}
-        self.publish(self.panel_state_topic, {}, payload, zone=zone)
+        self._update_panel_status("triggered", zone=zone)
 
     def on_alarm_restored(self, dev, zone, user=None):
         LOG.info("on_alarm_restored zone: %s", zone)
-
-        payload = {"status" : "disarmed"}
-        self.publish(self.panel_state_topic, {}, payload, zone=zone)
-
-        payload = {
-            "status" : "None",
-            "entity" : "None",
-            "zone_num" : 0,
-            }
-        self.publish(self.panel_faulted_topic, {}, payload)
+        self._update_panel_status("disarmed", zone=zone)
+        self.last_alarm_zone = "None"
 
     def on_fire(self, dev, status):
         # message.fire_alarm
@@ -246,8 +227,7 @@ class Bridge:
             self.on_bypass(dev, message.zone_bypassed)
             self.on_low_battery(dev, message.battery_low)
 
-        LOG.info("on_message '%s'", message)
-        self.panel_attr = {
+        panel_attr = {
             "ac_power_on": message.ac_power,
             "alarm_event_occurred": message.alarm_event_occurred,
             "backlight_on": message.backlight_on,
@@ -260,7 +240,7 @@ class Bridge:
             "zone_bypassed": message.zone_bypassed,
             }
 
-        payload = {"status" : message.text.strip(), "attr" : self.panel_attr}
+        payload = {"status" : message.text.strip()}
         self.publish(self.panel_msg_topic, {}, payload)
 
         # If there is a pending chime state request, process it now that we
@@ -268,13 +248,21 @@ class Bridge:
         if self.req_chime_on is not None:
             self.set_chime(self.req_chime_on)
 
-        # Update the panel state if this is the first call we've seen.
-        if self.is_armed is None:
-            self.is_armed = message.armed_away or message.armed_home
-            if self.is_armed:
-                self.on_arm(dev, stay=message.armed_home)
-            else:
-                self.on_disarm(dev)
+        # Update the panel state if this is the first call we've seen or if
+        # the attributes have changed.
+        if self.panel_status is None or self.panel_attr != panel_attr:
+            status = self.panel_status
+            if self.panel_status is None:
+                status = "disarmed"
+                if message.alarm_sounding:
+                    status = "triggered"
+                elif message.armed_away:
+                    status = "armed_away"
+                elif message.armed_home:
+                    status = "armed_home"
+
+            self.panel_attr = panel_attr
+            self._update_panel_status(status)
 
     def on_expander_message(self, dev, message):
         pass
@@ -327,3 +315,10 @@ class Bridge:
         self.ad.on_rfx_message += self.on_rfx_message
         self.ad.on_open += self.on_open
         self.ad.on_close += self.on_close
+
+    def _update_panel_status(self, status, zone=None):
+        self.panel_status = status
+
+        payload = {"status" : self.panel_status, "attr" : self.panel_attr,
+                   "last_alarm_zone" : self.last_alarm_zone}
+        self.publish(self.panel_state_topic, {}, payload, zone=zone)

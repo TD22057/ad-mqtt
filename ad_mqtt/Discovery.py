@@ -8,6 +8,14 @@ class Discovery:
         self.messages = []
 
         topic = 'homeassistant/alarm_control_panel/admqtt_alarm_panel/config'
+        # Combine the time vield from the json message w/ all the attributes
+        # into a single json dict for the entity attributes.
+        attr_templ = ('{ "time" : "{{value_json.time}}", '
+                      '"last_alarm_zone" : "{{value_json.last_alarm_zone}}", '
+                      '{% for k,v in value_json.attr.items() %}'
+                      '{{ k | tojson }} : {{ v | tojson }}'
+                      '{{ ", " if not loop.last else "" }}'
+                      '{% endfor %} }')
         payload = {
             'object_id' : 'alarm_panel_mqtt',
             'unique_id' : 'admqtt_alarm_panel',
@@ -22,14 +30,11 @@ class Discovery:
             'payload_arm_home' : 'arm_stay',
             'payload_arm_night' : 'arm_night',
             'payload_disarm' : 'disarm',
-            'json_attributes_topic' : bridge.panel_msg_topic,
-            'json_attributes_template' : '{{value_json.attr | tojson}}',
+            'json_attributes_topic' : bridge.panel_state_topic,
+            'json_attributes_template' : attr_templ,
             'qos' : 1,
             }
         self.messages.append((topic, payload))
-
-        # TODO: create last updated time sensors for everything since HA
-        # doesn't save that information.
 
         # main panel battery sensor
         topic = 'homeassistant/sensor/admqtt_alarm_panel_battery/config'
@@ -83,6 +88,8 @@ class Discovery:
             'icon' : 'mdi:alarm-check',
             'state_topic' : bridge.panel_msg_topic,
             'value_template' : '{{value_json.status}}',
+            'json_attributes_topic' : bridge.panel_msg_topic,
+            'json_attributes_template' : '{ "time" : "{{value_json.time}}" }',
             }
         self.messages.append((topic, payload))
 
@@ -117,15 +124,20 @@ class Discovery:
             entity = info['entity']
             has_battery = info.get('rf_id', None)
             info['unique_id'] = unique_id = 'admqtt_' + entity
+            attr_templ = ('{ "time" : "{{value_json.time}}", '
+                          '"zone_num" : {{value_json.zone_num}} }')
 
             topic = f'homeassistant/binary_sensor/{unique_id}/config'
+            state_topic = bridge.sensor_state_topic.format(
+                unique_id=unique_id, entity=entity)
             payload = {
                 'name' : info['label'],
                 'object_id' : entity,
                 'unique_id' : unique_id,
-                'state_topic' : bridge.sensor_state_topic.format(
-                    unique_id=unique_id, entity=entity),
+                'state_topic' : state_topic,
                 'value_template' : '{{value_json.status}}',
+                'json_attributes_topic' : state_topic,
+                'json_attributes_template' : attr_templ,
                 }
             if 'window' in entity.lower():
                 payload['device_class'] = 'window'
@@ -137,15 +149,18 @@ class Discovery:
                 bat_entity = entity + '_battery'
                 bat_unique_id = unique_id + '_battery'
                 topic = f'homeassistant/sensor/{bat_unique_id}/config'
+                state_topic = bridge.sensor_battery_topic.format(
+                    unique_id=bat_unique_id, entity=bat_entity)
                 payload = {
                     'name' : info['label'] + ' Battery',
                     'object_id' : bat_entity,
                     'unique_id' : bat_unique_id,
-                    'state_topic' : bridge.sensor_battery_topic.format(
-                        unique_id=bat_unique_id, entity=bat_entity),
+                    'state_topic' : state_topic,
                     'value_template' : '{{value_json.status}}',
                     'unit_of_measurement': '%',
                     'device_class' : 'battery',
+                    'json_attributes_topic' : state_topic,
+                    'json_attributes_template' : attr_templ,
                     }
                 self.messages.append((topic, payload))
 
