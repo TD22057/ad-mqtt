@@ -6,7 +6,7 @@ from .Client import Client
 from .Discovery import Discovery
 
 
-def run(host, port, alarm_code, zone_data,
+def run(ad_host, ad_port,mqtt_host,mqtt_port,mqtt_user,mqtt_pass, alarm_code, zone_data,
         log_level=logging.INFO, log_screen=True, log_file=None):
     fmt = '%(asctime)s.%(msecs)03d %(levelname)s %(module)s: %(message)s'
     datefmt = '%Y-%m-%d %H:%M:%S'
@@ -31,11 +31,11 @@ def run(host, port, alarm_code, zone_data,
             log.addHandler(file_handler)
 
     # Alarm decoder network device.
-    adClient = Client(host, port)
+    adClient = Client(ad_host, ad_port)
     decoder = AD.AlarmDecoder(adClient)
     decoder._wire_events()
 
-    mqttClient = IM.network.Mqtt()
+    mqttClient = IM.network.Mqtt(mqtt_host, mqtt_port)
     mqttClient.availability_topic = "alarm/available"
 
     bridge = Bridge(mqttClient, decoder, zone_data, alarm_code)

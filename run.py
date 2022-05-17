@@ -5,8 +5,12 @@ import sys
 sys.path.insert( 0, "." )
 import ad_mqtt
 
-host = ''
-port = 22053
+ad_host = '10.0.0.36'
+ad_port = 10000
+mqtt_host = '10.0.0.79'
+mqtt_port = 1883
+mqtt_user = ''
+mqtt_pass = ''
 log_level = logging.DEBUG
 log_screen = False
 log_file = "log.txt"
@@ -17,7 +21,6 @@ zone_data = {
           "label" : "Fire Alarm" },
     2 : { "entity" : "basement_door",
           "label" : "Basement Door" },
-    # Wireless sensors need rf_id
     25 : { "entity" : "front_door",
            "label" : "Front Door",
            "rf_id" : "012345" },
@@ -50,5 +53,5 @@ zone_data = {
            "rf_id" : "012345" },
     }
 
-ad_mqtt.run.run(host, port, alarm_code, zone_data,
+ad_mqtt.run.run(ad_host, ad_port, mqtt_host,mqtt_port,mqtt_user,mqtt_pass,alarm_code, zone_data,
                 log_level=log_level, log_screen=log_screen, log_file=log_file)
