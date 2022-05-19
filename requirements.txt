@@ -2,3 +2,5 @@ pyyaml>=3
 Jinja2>=2.1
 alarmdecoder
 git+https://github.com/TD22057/insteon-mqtt#egg=insteon-mqtt
+python-dotenv>=0.20.0
+python-decouple>=3.6

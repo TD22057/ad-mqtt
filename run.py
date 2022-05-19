@@ -4,14 +4,15 @@ import logging
 import sys
 sys.path.insert( 0, "." )
 import ad_mqtt
+from decouple import config
 
-ad_host = ''
-ad_port = 10000
-mqtt_broker = '127.0.0.1'
-mqtt_port = 1883
-mqtt_user = ''
-mqtt_pass = ''
-mqtt_id = 'ad-mqtt'
+ad_host = config('AD_HOST', default="127.0.0.1")
+ad_port = config('AD_PORT',default=10000, cast=int)
+mqtt_broker = config('MQTT_BROKER', default="127.0.0.1")
+mqtt_port = config('MQTT_PORT',default=1883, cast=int)
+mqtt_user = config('MQTT_USER',default="")
+mqtt_pass = config('MQTT_PASS',default="")
+mqtt_id = config('MQTT_ID',default="ad-mqtt")
 log_level = logging.DEBUG
 log_screen = False
 log_file = "log.txt"
