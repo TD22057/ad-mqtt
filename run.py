@@ -3,7 +3,7 @@
 import logging
 import sys
 sys.path.insert( 0, "." )
-import ad_mqtt
+import ad_mqtt.run as AD2MQTT
 from decouple import config
 
 ad_host = config('AD_HOST', default="127.0.0.1")
