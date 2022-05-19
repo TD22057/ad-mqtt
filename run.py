@@ -17,7 +17,7 @@ log_level = logging.DEBUG
 log_screen = False
 log_file = "log.txt"
 
-alarm_code = "1234"
+alarm_code = config('ALARM_CODE', default="127.0.0.1")
 
 zone_data = {
     1 : { "entity" : "fire",
