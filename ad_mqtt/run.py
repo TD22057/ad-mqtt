@@ -6,7 +6,7 @@ from .Client import Client
 from .Discovery import Discovery
 
 
-def run(ad_host, ad_port,mqtt_host,mqtt_port,mqtt_user,mqtt_pass, alarm_code, zone_data,
+def run(ad_host, ad_port,mqtt_broker,mqtt_port,mqtt_user,mqtt_pass,mqtt_id, alarm_code, zone_data,
         log_level=logging.INFO, log_screen=True, log_file=None):
     fmt = '%(asctime)s.%(msecs)03d %(levelname)s %(module)s: %(message)s'
     datefmt = '%Y-%m-%d %H:%M:%S'
@@ -18,10 +18,8 @@ def run(ad_host, ad_port,mqtt_host,mqtt_port,mqtt_user,mqtt_pass, alarm_code, zo
         file_handler = logging.handlers.WatchedFileHandler(log_file)
         file_handler.setFormatter(formatter)
 
-    log_names = [
-        "ad_mqtt",
-        #"insteon_mqtt",
-        ]
+    log_names = ["ad_mqtt"]
+
     for name in log_names:
         log = logging.getLogger(name)
         log.setLevel(log_level)
@@ -35,8 +33,17 @@ def run(ad_host, ad_port,mqtt_host,mqtt_port,mqtt_user,mqtt_pass, alarm_code, zo
     decoder = AD.AlarmDecoder(adClient)
     decoder._wire_events()
 
-    mqttClient = IM.network.Mqtt(mqtt_host, mqtt_port)
-    mqttClient.availability_topic = "alarm/available"
+    #MQTT Config
+    mqttClient = IM.network.Mqtt()
+    mqttClient.load_config(config={
+        'broker': mqtt_broker,
+        'port':mqtt_port,
+        'username':mqtt_user,
+        'password':mqtt_pass,
+        'id': mqtt_id,
+        'availability_topic': "alarm/available"
+    })
+
 
     bridge = Bridge(mqttClient, decoder, zone_data, alarm_code)
     discovery = Discovery(mqttClient, bridge, zone_data)

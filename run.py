@@ -5,17 +5,19 @@ import sys
 sys.path.insert( 0, "." )
 import ad_mqtt
 
-ad_host = '10.0.0.36'
+ad_host = ''
 ad_port = 10000
-mqtt_host = '10.0.0.79'
+mqtt_broker = '127.0.0.1'
 mqtt_port = 1883
 mqtt_user = ''
 mqtt_pass = ''
+mqtt_id = 'ad-mqtt'
 log_level = logging.DEBUG
 log_screen = False
 log_file = "log.txt"
 
 alarm_code = "1234"
+
 zone_data = {
     1 : { "entity" : "fire",
           "label" : "Fire Alarm" },
@@ -52,6 +54,5 @@ zone_data = {
            "label" : "Media Right Door",
            "rf_id" : "012345" },
     }
-
-ad_mqtt.run.run(ad_host, ad_port, mqtt_host,mqtt_port,mqtt_user,mqtt_pass,alarm_code, zone_data,
+ad_mqtt.run.run(ad_host, ad_port, mqtt_broker,mqtt_port,mqtt_user,mqtt_pass,mqtt_id,alarm_code, zone_data,
                 log_level=log_level, log_screen=log_screen, log_file=log_file)
