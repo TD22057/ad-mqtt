@@ -13,11 +13,11 @@ mqtt_port = config('MQTT_PORT',default=1883, cast=int)
 mqtt_user = config('MQTT_USER',default="")
 mqtt_pass = config('MQTT_PASS',default="")
 mqtt_id = config('MQTT_ID',default="ad-mqtt")
-log_level = logging.DEBUG
+log_level = config('LOG_LEVEL',default=logging.CRITICAL)
 log_screen = False
 log_file = "log.txt"
 
-alarm_code = config('ALARM_CODE', default="127.0.0.1")
+alarm_code = config('ALARM_CODE', default="1234")
 
 zone_data = {
     1 : { "entity" : "fire",
