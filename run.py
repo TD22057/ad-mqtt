@@ -14,8 +14,8 @@ mqtt_user = config('MQTT_USER',default="")
 mqtt_pass = config('MQTT_PASS',default="")
 mqtt_id = config('MQTT_ID',default="ad-mqtt")
 log_level = config('LOG_LEVEL',default=logging.CRITICAL)
-log_screen = False
-log_file = "log.txt"
+log_screen = config('LOG_SCREEN',default=False, cast=bool)
+log_file = config('LOG_FILE',default="log.txt")
 
 alarm_code = config('ALARM_CODE', default="1234")
 
