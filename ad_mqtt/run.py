@@ -7,7 +7,7 @@ from .Discovery import Discovery
 
 
 def run(ad_host, ad_port,mqtt_broker,mqtt_port,mqtt_user,mqtt_pass,mqtt_id, alarm_code, zone_data,
-        log_level=logging.INFO, log_screen=True, log_file=None):
+        log_level, log_screen=True, log_file=None):
     fmt = '%(asctime)s.%msecs)03d %(levelname)s %(module)s: %(message)s'
     datefmt = '%Y-%m-%d %H:%M:%S'
     formatter = logging.Formatter(fmt, datefmt)
@@ -22,12 +22,11 @@ def run(ad_host, ad_port,mqtt_broker,mqtt_port,mqtt_user,mqtt_pass,mqtt_id, alar
 
     for name in log_names:
         log = logging.getLogger(name)
-        log.setLevel(log_level)
+        log.setLevel(logging.getLevelName(log_level))
         if log_screen:
             log.addHandler(screen_handler)
         if log_file:
             log.addHandler(file_handler)
-
     # Alarm decoder network device.
     ad_client = Client(ad_host, ad_port)
     decoder = AD.AlarmDecoder(ad_client)
