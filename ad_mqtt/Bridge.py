@@ -128,6 +128,7 @@ class Bridge:
         self.publish(self.bypass_state_topic, {}, payload)
 
     def publish(self, topic, topic_args, payload_args, zone=None):
+        # TODO: Refactor return in skipping unknown zone
         time = DT.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         payload_args["time"] = time
 
@@ -137,7 +138,7 @@ class Bridge:
             info = self.zone_data.get(zone)
             if not info:
                 LOG.error("Skipping unknown zone %s", zone)
-
+                return
             payload_args["zone"] = info["entity"]
             topic_args["entity"] = info["entity"]
 
