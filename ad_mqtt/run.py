@@ -8,7 +8,7 @@ from .Discovery import Discovery
 
 def run(ad_host, ad_port,mqtt_broker,mqtt_port,mqtt_user,mqtt_pass,mqtt_id, alarm_code, zone_data,
         log_level=logging.INFO, log_screen=True, log_file=None):
-    fmt = '%(asctime)s.%(msecs)03d %(levelname)s %(module)s: %(message)s'
+    fmt = '%(asctime)s.%msecs)03d %(levelname)s %(module)s: %(message)s'
     datefmt = '%Y-%m-%d %H:%M:%S'
     formatter = logging.Formatter(fmt, datefmt)
     if log_screen:
@@ -29,13 +29,13 @@ def run(ad_host, ad_port,mqtt_broker,mqtt_port,mqtt_user,mqtt_pass,mqtt_id, alar
             log.addHandler(file_handler)
 
     # Alarm decoder network device.
-    adClient = Client(ad_host, ad_port)
-    decoder = AD.AlarmDecoder(adClient)
+    ad_client = Client(ad_host, ad_port)
+    decoder = AD.AlarmDecoder(ad_client)
     decoder._wire_events()
 
     #MQTT Config
-    mqttClient = IM.network.Mqtt()
-    mqttClient.load_config(config={
+    mqtt_client = IM.network.Mqtt()
+    mqtt_client.load_config(config={
         'broker': mqtt_broker,
         'port':mqtt_port,
         'username':mqtt_user,
@@ -45,12 +45,12 @@ def run(ad_host, ad_port,mqtt_broker,mqtt_port,mqtt_user,mqtt_pass,mqtt_id, alar
     })
 
 
-    bridge = Bridge(mqttClient, decoder, zone_data, alarm_code)
-    discovery = Discovery(mqttClient, bridge, zone_data)
+    bridge = Bridge(mqtt_client, decoder, zone_data, alarm_code)
+    discovery = Discovery(mqtt_client, bridge, zone_data)
 
     loop = IM.network.poll.Manager()
-    loop.add(adClient, connected=False)
-    loop.add(mqttClient, connected=False)
+    loop.add(ad_client, connected=False)
+    loop.add(mqtt_client, connected=False)
 
     while loop.active():
         loop.select()
