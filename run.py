@@ -13,7 +13,7 @@ mqtt_port = config('MQTT_PORT',default=1883, cast=int)
 mqtt_user = config('MQTT_USER',default="")
 mqtt_pass = config('MQTT_PASS',default="")
 mqtt_id = config('MQTT_ID',default="ad-mqtt")
-log_level = config('LOG_LEVEL',default=logging.CRITICAL)
+log_level = config('LOG_LEVEL',default=logging.ERROR)
 log_screen = config('LOG_SCREEN',default=False, cast=bool)
 log_file = config('LOG_FILE',default="log.txt")
 
