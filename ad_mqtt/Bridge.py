@@ -283,10 +283,14 @@ class Bridge:
             return
 
         if message.value is not None:
-            is_low_battery = bool(message.value & 0x02)
+            is_low_battery = bool(message.battery)
+            zone=info["zone"]
+            rf_loop=info["rf_loop"]
+            payload={"status": "OFF" if message.loop[rf_loop-1]==bool(False) else "ON"}
+            self.publish(self.sensor_state_topic,{},payload,zone)
             payload = {"status" : 10 if is_low_battery else 100}
-            self.publish(self.sensor_battery_topic, {}, payload,
-                         zone=info["zone"])
+            battery_topic="alarm/sensor/{entity}_battery/battery"
+            self.publish(battery_topic,{}, payload,zone)
 
     def on_open(self, dev):
         LOG.info("on_open")
