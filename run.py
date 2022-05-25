@@ -1,12 +1,12 @@
 #!./venv/bin/python
-
-from email.policy import default
+import json
 import logging
 import sys
+from decouple import config
 
 sys.path.insert(0, ".")
 import ad_mqtt.run as ad2mqtt
-from decouple import config
+
 
 ad_host = config('AD_HOST', default="127.0.0.1")
 ad_port = config('AD_PORT', default=10000, cast=int)
@@ -19,6 +19,7 @@ log_level = config('LOG_LEVEL', default=logging.DEBUG)
 log_screen = config('LOG_SCREEN', default=True, cast=bool)
 log_file = config('LOG_FILE', default=None)
 alarm_code = config('ALARM_CODE', default="1234")
+zone_data = {int(k): v if k.isnumeric() else k for k, v in json.loads(config('ZONE_DATA')).items()}
 
 ad2mqtt.run(ad_host, ad_port, mqtt_broker, mqtt_port, mqtt_user, mqtt_pass, mqtt_id, alarm_code, zone_data,
-            log_level=log_level, log_screen=log_screen, log_file=log_file)
+           log_level=log_level, log_screen=log_screen, log_file=log_file)
