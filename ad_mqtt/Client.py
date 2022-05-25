@@ -2,26 +2,26 @@
 import errno
 import logging
 import socket
-import insteon_mqtt.network as IN
-import alarmdecoder.event as ADE
-
+import insteon_mqtt.network as in_mqtt
+import alarmdecoder.event as ade
+import alarmdecoder.util as adu
 LOG = logging.getLogger(__name__)
 
 
-class Client (IN.Link):
+class Client(in_mqtt.Link):
     # Alarmdecoder signals to implement the device api.  Also need write().
-    on_open = ADE.event.Event("Connected event.  f(link)")
-    on_close = ADE.event.Event("Close event.  f(link)")
-    on_read = ADE.event.Event("Read cb.  f(link, bytes)")
-    on_write = ADE.event.Event("Written db.  f(link, data)")
+    on_open = ade.event.Event("Connected event.  f(link)")
+    on_close = ade.event.Event("Close event.  f(link)")
+    on_read = ade.event.Event("Read cb.  f(link, bytes)")
+    on_write = ade.event.Event("Written db.  f(link, data)")
 
     def __init__(self, host='', port=10000, reconnect_dt=30):
-        IN.Link.__init__(self)
+        in_mqtt.Link.__init__(self)
         self.addr = (host, port)
         self.reconnect_dt = reconnect_dt
         self._init_vars()
 
-    #-----------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     def write(self, data):
         if not len(data):
             return
@@ -36,7 +36,7 @@ class Client (IN.Link):
         # Only need to emit if there was no data in the buffer already.
         self.signal_needs_write.emit(self, True)
 
-    #-----------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     def retry_connect_dt(self):
         """Return a positive integer (seconds) if the link should reconnect.
 
@@ -46,7 +46,7 @@ class Client (IN.Link):
         """
         return self.reconnect_dt
 
-    #-----------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     def connect(self):
         """Connect the link to the device.
 
@@ -73,7 +73,7 @@ class Client (IN.Link):
         self.on_open()
         return True
 
-    #-----------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     def fileno(self):
         """Return the file descriptor to watch for this link.
 
@@ -82,7 +82,7 @@ class Client (IN.Link):
         """
         return self.socket.fileno()
 
-    #-----------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     def read_from_link(self):
         """Read data from the link.
 
@@ -115,7 +115,7 @@ class Client (IN.Link):
         self.parse_read_buf()
         return 0
 
-    #-----------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     def parse_read_buf(self):
         """TODO
         """
@@ -126,14 +126,15 @@ class Client (IN.Link):
             # for more data
             if not _sep or not line:
                 break
+            try:
+                line = line.rstrip(b"\r\n")
+                LOG.debug("Processing line '%s'", line)
+                self.on_read(data=line)
+                self._read_buf = after
+            except adu.InvalidMessageError:
+                LOG.error("Invalid line")
 
-            line = line.rstrip(b"\r\n")
-
-            LOG.debug("Processing line '%s'", line)
-            self.on_read(data=line)
-            self._read_buf = after
-
-    #-----------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     def write_to_link(self, t):
         """Write data from the link.
 
@@ -170,7 +171,7 @@ class Client (IN.Link):
         if not len(self._write_buf):
             self.signal_needs_write.emit(self, False)
 
-    #-----------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     def close(self):
         """Close the link.
 
@@ -192,7 +193,7 @@ class Client (IN.Link):
         self.socket.close()
         self._init_vars()
 
-    #-----------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     def _init_vars(self):
         "TODO:"
         self.socket = None
@@ -201,4 +202,4 @@ class Client (IN.Link):
         self._write_buf = bytes()
         self.isClosing = False
 
-    #-----------------------------------------------------------------------
+    # -----------------------------------------------------------------------
