@@ -124,7 +124,7 @@ class Bridge:
         LOG.info("Read bypass set '%s'", msg)
         self.is_bypass = (msg.lower() == "on")
 
-        payload = {"status" : "ON" if self.is_bypass else "OFF"}
+        payload = {"status": "ON" if self.is_bypass else "OFF"}
         self.publish(self.bypass_state_topic, {}, payload)
 
     def publish(self, topic, topic_args, payload_args, zone=None):
@@ -187,7 +187,7 @@ class Bridge:
         # status == bool
         LOG.info("on_bypass %s zone=%s", status, zone)
 
-        payload = {"status" : "ON" if status else "OFF"}
+        payload = {"status": "ON" if status else "OFF"}
         self.publish(self.panel_bypass_topic, {}, payload, zone=zone)
 
     def on_boot(self, dev):
@@ -195,18 +195,18 @@ class Bridge:
 
     def on_zone_fault(self, dev, zone):
         LOG.info("on_zone_fault %s", zone)
-        payload = {"status" : "ON"}
+        payload = {"status": "ON"}
         self.publish(self.sensor_state_topic, {}, payload, zone=zone)
 
     def on_zone_restore(self, dev, zone):
         LOG.info("on_zone_restored %s", zone)
 
-        payload = {"status" : "OFF"}
+        payload = {"status": "OFF"}
         self.publish(self.sensor_state_topic, {}, payload, zone=zone)
 
     def on_low_battery(self, dev, status):
         # status = bool
-        payload = {"status" : 10 if status else 100}
+        payload = {"status": 10 if status else 100}
         self.publish(self.panel_battery_topic, {}, payload)
 
     def on_panic(self, dev, status):
@@ -218,7 +218,7 @@ class Bridge:
 
     def on_chime_changed(self, dev, status):
         # status = bool
-        payload = {"status" : "ON" if status else "OFF"}
+        payload = {"status": "ON" if status else "OFF"}
         self.publish(self.chime_state_topic, {}, payload)
 
     def on_message(self, dev, message):
@@ -239,9 +239,9 @@ class Bridge:
             "programming_mode": message.programming_mode,
             "ready": message.ready,
             "zone_bypassed": message.zone_bypassed,
-            }
+        }
 
-        payload = {"status" : message.text.strip()}
+        payload = {"status": message.text.strip()}
         self.publish(self.panel_msg_topic, {}, payload)
 
         # If there is a pending chime state request, process it now that we
@@ -284,13 +284,13 @@ class Bridge:
 
         if message.value is not None:
             is_low_battery = bool(message.battery)
-            zone=info["zone"]
-            rf_loop=info["rf_loop"]
-            payload={"status": "OFF" if message.loop[rf_loop-1]==bool(False) else "ON"}
-            self.publish(self.sensor_state_topic,{},payload,zone)
-            payload = {"status" : 10 if is_low_battery else 100}
-            battery_topic="alarm/sensor/{entity}_battery/battery"
-            self.publish(battery_topic,{}, payload,zone)
+            zone = info["zone"]
+            rf_loop = info["rf_loop"]
+            payload = {"status": "OFF" if message.loop[rf_loop - 1] == bool(False) else "ON"}
+            self.publish(self.sensor_state_topic, {}, payload, zone)
+            payload = {"status": 10 if is_low_battery else 100}
+            battery_topic = "alarm/sensor/{entity}_battery/battery"
+            self.publish(battery_topic, {}, payload, zone)
 
     def on_open(self, dev):
         LOG.info("on_open")
@@ -324,6 +324,6 @@ class Bridge:
     def _update_panel_status(self, status, zone=None):
         self.panel_status = status
 
-        payload = {"status" : self.panel_status, "attr" : self.panel_attr,
-                   "last_alarm_zone" : self.last_alarm_zone}
+        payload = {"status": self.panel_status, "attr": self.panel_attr,
+                   "last_alarm_zone": self.last_alarm_zone}
         self.publish(self.panel_state_topic, {}, payload, zone=zone)
