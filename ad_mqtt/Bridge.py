@@ -39,13 +39,13 @@ class Bridge:
 
         self.rf_map = {}
         for zone, info in zone_data.items():
-            if "rf_id" not in info:
-                continue
-
-            rf_id = int(info["rf_id"])
-            info["rf_id"] = rf_id
-            info["zone"] = zone
-            self.rf_map[rf_id] = info
+            if "rf_id" in info:
+                rf_id = int(info["rf_id"])
+                info["rf_id"] = rf_id
+                info["zone"] = zone
+                self.rf_map[rf_id] = info
+            if "device_class" in zone_data.items():
+                self.device_class = info["device_class"]
 
         mqtt.signal_connected.connect(self.mqtt_connected)
 

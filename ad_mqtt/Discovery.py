@@ -121,6 +121,7 @@ class Discovery:
         self.messages.append((topic, payload))
 
         for info in zone_data.values():
+
             entity = info['entity']
             has_battery = info.get('rf_id', None)
             info['unique_id'] = unique_id = 'admqtt_' + entity
@@ -139,7 +140,9 @@ class Discovery:
                 'json_attributes_topic' : state_topic,
                 'json_attributes_template' : attr_templ,
                 }
-            if 'window' in entity.lower():
+            if "device_class" in info:
+                payload['device_class'] = info["device_class"]
+            elif 'window' in entity.lower():
                 payload['device_class'] = 'window'
             elif 'door' in entity.lower():
                 payload['device_class'] = 'door'
