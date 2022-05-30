@@ -31,19 +31,26 @@ def run(host, port, mqtt_broker_ip, mqtt_broker_port, mqtt_user, mqtt_pass, alar
             log.addHandler(file_handler)
 
     # Alarm decoder network device.
-    adClient = Client(host, port)
-    decoder = AD.AlarmDecoder(adClient)
+    ad_client = Client(host, port)
+    decoder = AD.AlarmDecoder(ad_client)
     decoder._wire_events()
 
-    mqttClient = IM.network.Mqtt()
-    mqttClient.availability_topic = "alarm/available"
+    mqtt_client = IM.network.Mqtt()
+    mqtt_client.load_config(config={
+        'broker': mqtt_broker_ip,
+        'port': mqtt_broker_port,
+        'username': mqtt_user,
+        'password': mqtt_pass,
+        'id': "ad_mqtt",
+        'availability_topic': "alarm/available"
+    })
 
-    bridge = Bridge(mqttClient, decoder, zone_data, alarm_code)
-    discovery = Discovery(mqttClient, bridge, zone_data)
+    bridge = Bridge(mqtt_client, decoder, zone_data, alarm_code)
+    discovery = Discovery(mqtt_client, bridge, zone_data)
 
     loop = IM.network.poll.Manager()
-    loop.add(adClient, connected=False)
-    loop.add(mqttClient, connected=False)
+    loop.add(ad_client, connected=False)
+    loop.add(mqtt_client, connected=False)
 
     while loop.active():
         loop.select()
