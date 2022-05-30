@@ -6,7 +6,7 @@ from .Client import Client
 from .Discovery import Discovery
 
 
-def run(host, port, alarm_code, zone_data,
+def run(host, port, mqtt_broker_ip, mqtt_broker_port, mqtt_user, mqtt_pass, alarm_code, zone_data,
         log_level=logging.INFO, log_screen=True, log_file=None):
     fmt = '%(asctime)s.%(msecs)03d %(levelname)s %(module)s: %(message)s'
     datefmt = '%Y-%m-%d %H:%M:%S'
@@ -20,8 +20,8 @@ def run(host, port, alarm_code, zone_data,
 
     log_names = [
         "ad_mqtt",
-        #"insteon_mqtt",
-        ]
+        # "insteon_mqtt",
+    ]
     for name in log_names:
         log = logging.getLogger(name)
         log.setLevel(log_level)
