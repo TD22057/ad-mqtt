@@ -7,6 +7,10 @@ import ad_mqtt
 
 ad_host = ''
 ad_port = 22053
+mqtt_broker_ip = "127.0.0.1"
+mqtt_broker_port = 1883
+mqtt_user = ""
+mqtt_pass = ""
 log_level = logging.DEBUG
 log_screen = False
 log_file = "log.txt"
