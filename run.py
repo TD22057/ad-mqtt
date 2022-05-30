@@ -5,8 +5,8 @@ import sys
 sys.path.insert( 0, "." )
 import ad_mqtt
 
-host = ''
-port = 22053
+ad_host = ''
+ad_port = 22053
 log_level = logging.DEBUG
 log_screen = False
 log_file = "log.txt"
@@ -50,5 +50,5 @@ zone_data = {
            "rf_id" : "012345" },
     }
 
-ad_mqtt.run.run(host, port, alarm_code, zone_data,
+ad_mqtt.run.run(ad_host, ad_port, alarm_code, zone_data,
                 log_level=log_level, log_screen=log_screen, log_file=log_file)
