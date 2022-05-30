@@ -6,7 +6,7 @@ from .Client import Client
 from .Discovery import Discovery
 
 
-def run(host, port, mqtt_broker_ip, mqtt_broker_port, mqtt_user, mqtt_pass, alarm_code, zone_data,
+def run(ad_host, ad_port, mqtt_broker_ip, mqtt_broker_port, mqtt_user, mqtt_pass, alarm_code, zone_data,
         log_level=logging.INFO, log_screen=True, log_file=None):
     fmt = '%(asctime)s.%(msecs)03d %(levelname)s %(module)s: %(message)s'
     datefmt = '%Y-%m-%d %H:%M:%S'
@@ -31,7 +31,7 @@ def run(host, port, mqtt_broker_ip, mqtt_broker_port, mqtt_user, mqtt_pass, alar
             log.addHandler(file_handler)
 
     # Alarm decoder network device.
-    ad_client = Client(host, port)
+    ad_client = Client(ad_host, ad_port)
     decoder = AD.AlarmDecoder(ad_client)
     decoder._wire_events()
 
