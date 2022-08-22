@@ -3,47 +3,58 @@ import alarmdecoder as AD
 import insteon_mqtt as IM
 from .Bridge import Bridge
 from .Client import Client
+from . import Devices
 from .Discovery import Discovery
 
-
-def run(host, port, alarm_code, zone_data,
-        log_level=logging.INFO, log_screen=True, log_file=None):
+def setup_logging(log_cfg):
     fmt = '%(asctime)s.%(msecs)03d %(levelname)s %(module)s: %(message)s'
     datefmt = '%Y-%m-%d %H:%M:%S'
     formatter = logging.Formatter(fmt, datefmt)
-    if log_screen:
+
+    if log_cfg.screen:
         screen_handler = logging.StreamHandler()
         screen_handler.setFormatter(formatter)
-    if log_file:
-        file_handler = logging.handlers.WatchedFileHandler(log_file)
+
+    if log_cfg.file:
+        file_handler = logging.handlers.RotatingFileHandler(log_cfg.file,
+            maxBytes=log_cfg.size_kb*1000, backupCount=log_cfg.backup_count)
         file_handler.setFormatter(formatter)
 
-    log_names = [
-        "ad_mqtt",
-        #"insteon_mqtt",
-        ]
-    for name in log_names:
+    for name in log_cfg.modules:
         log = logging.getLogger(name)
-        log.setLevel(log_level)
-        if log_screen:
+        log.setLevel(log_cfg.level)
+        if log_cfg.screen:
             log.addHandler(screen_handler)
-        if log_file:
+        if log_cfg.file:
             log.addHandler(file_handler)
 
-    # Alarm decoder network device.
-    adClient = Client(host, port)
-    decoder = AD.AlarmDecoder(adClient)
-    decoder._wire_events()
 
-    mqttClient = IM.network.Mqtt()
-    mqttClient.availability_topic = "alarm/available"
+def run(cfg, alarm_code, devices):
+    setup_logging(cfg.log)
 
-    bridge = Bridge(mqttClient, decoder, zone_data, alarm_code)
-    discovery = Discovery(mqttClient, bridge, zone_data)
+    log = logging.getLogger(__name__)
 
-    loop = IM.network.poll.Manager()
-    loop.add(adClient, connected=False)
-    loop.add(mqttClient, connected=False)
+    try:
+        zones, rf_devices = Devices.init_devices(devices)
 
-    while loop.active():
-        loop.select()
+        # Alarm decoder network device.
+        ad_client = Client(cfg.alarm.host, cfg.alarm.port)
+        decoder = AD.AlarmDecoder(ad_client)
+        decoder._wire_events()
+
+        mqtt_client = IM.network.Mqtt( id="ad-mqtt" )
+        # IM uses dict: cfg['a'] not cfg.a
+        mqtt_client.load_config(cfg.mqtt.__dict__)
+
+        bridge = Bridge(mqtt_client, decoder, alarm_code, zones, rf_devices)
+        discovery = Discovery(mqtt_client, bridge, zones)
+
+        loop = IM.network.poll.Manager()
+        loop.add(ad_client, connected=False)
+        loop.add(mqtt_client, connected=False)
+
+        while loop.active():
+            loop.select()
+    except:
+        log.exception("Unexpected exception")
+        raise

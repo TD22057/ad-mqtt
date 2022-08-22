@@ -1,8 +1,10 @@
 import json
+import logging
 
+LOG = logging.getLogger(__name__)
 
 class Discovery:
-    def __init__(self, mqtt, bridge, zone_data):
+    def __init__(self, mqtt, bridge, zones):
         self.mqtt = mqtt
         mqtt.signal_connected.connect(self.mqtt_connected)
         self.messages = []
@@ -120,39 +122,35 @@ class Discovery:
             }
         self.messages.append((topic, payload))
 
-        for info in zone_data.values():
-            entity = info['entity']
-            has_battery = info.get('rf_id', None)
-            info['unique_id'] = unique_id = 'admqtt_' + entity
+        for z in zones.values():
+            z.unique_id = 'admqtt_' + z.entity
             attr_templ = ('{ "time" : "{{value_json.time}}", '
                           '"zone_num" : {{value_json.zone_num}} }')
 
-            topic = f'homeassistant/binary_sensor/{unique_id}/config'
+            topic = f'homeassistant/binary_sensor/{z.unique_id}/config'
             state_topic = bridge.sensor_state_topic.format(
-                unique_id=unique_id, entity=entity)
+                unique_id=z.unique_id, entity=z.entity)
             payload = {
-                'name' : info['label'],
-                'object_id' : entity,
-                'unique_id' : unique_id,
+                'name' : z.label,
+                'object_id' : z.entity,
+                'unique_id' : z.unique_id,
                 'state_topic' : state_topic,
                 'value_template' : '{{value_json.status}}',
                 'json_attributes_topic' : state_topic,
                 'json_attributes_template' : attr_templ,
                 }
-            if 'window' in entity.lower():
-                payload['device_class'] = 'window'
-            elif 'door' in entity.lower():
-                payload['device_class'] = 'door'
+            if z.device_class is not None:
+                payload['device_class'] = z.device_class
             self.messages.append((topic, payload))
 
-            if has_battery:
-                bat_entity = entity + '_battery'
-                bat_unique_id = unique_id + '_battery'
+            if z.has_battery:
+                bat_entity = z.entity + '_battery'
+                bat_unique_id = z.unique_id + '_battery'
                 topic = f'homeassistant/sensor/{bat_unique_id}/config'
                 state_topic = bridge.sensor_battery_topic.format(
                     unique_id=bat_unique_id, entity=bat_entity)
                 payload = {
-                    'name' : info['label'] + ' Battery',
+                    'name' : z.label + ' Battery',
                     'object_id' : bat_entity,
                     'unique_id' : bat_unique_id,
                     'state_topic' : state_topic,
@@ -168,8 +166,12 @@ class Discovery:
         if not self.messages:
             return
 
-        # queue w/ response doesn't work because paho doesn't allow it
-        # - it's throws an error if you publish in the on_publish
-        # callback. (which IMO makes no sense).
+        LOG.info( "Discovery publish for %d messages", len( self.messages ) )
+
+        # Ideally we'd publish one, wait for an ack, then publish the next.
+        # But this doesn't work because paho will throw an error if you
+        # publish in the on_publish callback (which IMO makes no sense).
         for topic, payload in self.messages:
             self.mqtt.publish(topic, json.dumps(payload), qos=1, retain=True)
+
+        self.messages = []

@@ -3,52 +3,50 @@
 import logging
 import sys
 sys.path.insert( 0, "." )
-import ad_mqtt
+import ad_mqtt as AD
 
-host = ''
-port = 22053
-log_level = logging.DEBUG
-log_screen = False
-log_file = "log.txt"
+cfg = AD.Config()
 
+# Alarm Decoder ser2sock server location.
+cfg.alarm.host = '127.0.0.1'
+cfg.alarm.port = 10000
+
+# MQTT Broker connection
+cfg.mqtt.broker = '127.0.0.1'
+cfg.mqtt.port = 1883
+# Optional user/pass for the broker
+cfg.mqtt.username = None
+cfg.mqtt.password = None
+# Optional encryption settings for the broker.
+cfg.mqtt.encryption.ca_cert = None
+cfg.mqtt.encryption.certfile = None
+cfg.mqtt.encryption.keyfile = None
+
+# Debugging information
+cfg.log.level = logging.INFO
+cfg.log.screen = False
+cfg.log.file = "log.txt"
+cfg.log.size_kb = 5000
+cfg.log.backup_count = 3
+cfg.log.modules = ["ad_mqtt", "insteon_mqtt"]
+
+# For possible device class values, see:
+# https://www.home-assistant.io/integrations/binary_sensor/#device-class
 alarm_code = "1234"
-zone_data = {
-    1 : { "entity" : "fire",
-          "label" : "Fire Alarm" },
-    2 : { "entity" : "basement_door",
-          "label" : "Basement Door" },
-    # Wireless sensors need rf_id
-    25 : { "entity" : "front_door",
-           "label" : "Front Door",
-           "rf_id" : "012345" },
-    27 : { "entity" : "dining_room_door",
-           "label" : "Dining Room Door",
-           "rf_id" : "012345" },
-    29 : { "entity" : "kitchen_window_right",
-           "label" : "Kitchen Right Window",
-           "rf_id" : "012345" },
-    30 : { "entity" : "guest_bedroom_window",
-           "label" : "Guest Bedroom Window",
-           "rf_id" : "012345" },
-    31 : { "entity" : "guest_bathroom_window",
-           "label" : "Guest Bathroom Window",
-           "rf_id" : "012345" },
-    33 : { "entity" : "downstairs_bathroom_window",
-           "label" : "Downstairs Bathroom Window",
-           "rf_id" : "012345" },
-    34 : { "entity" : "den_door",
-           "label" : "Den Door",
-           "rf_id" : "012345" },
-    35 : { "entity" : "den_window",
-           "label" : "Den Window",
-           "rf_id" : "012345" },
-    36 : { "entity" : "media_door_left",
-           "label" : "Media Left Door",
-           "rf_id" : "012345" },
-    37 : { "entity" : "media_door_right",
-           "label" : "Media Right Door",
-           "rf_id" : "012345" },
-    }
+devices = [
+    # Zone( zone_number, HAS_entity_name, description, device_class )
+    AD.Zone(1, "fire", "Fire Alarm", "smoke"),
+    AD.Zone(2, "basement_door", "Basement Door"),
+    # RF zone ( serial_number, zone_number, HAS_entity_name, description )
+    AD.RfZone( 12345, 25, "front_door", "Front Door"),
+    AD.RfZone( 12345, 27, "dining_room_door", "Dining Room Door"),
+    AD.RfZone( 12345, 29, "kitchen_window_right", "Kitchen Right Window"),
+    AD.RfZone( 12345, 30, "guest_bedroom_window", "Guest Bedroom Window"),
+    AD.Rf( 12345, loops=[
+        AD.Zone(31, "side_window", "Side Window"),
+        None, None,  # loops 2, 3 unused
+        AD.Zone(32, "side_window_tampler", "Side Window Tampler", "tampler"),
+        ]),
+    ]
 
-ad_mqtt.run.run(host, port, alarm_code, zone_data,
-                log_level=log_level, log_screen=log_screen, log_file=log_file)
+AD.run.run(cfg, alarm_code, devices)
