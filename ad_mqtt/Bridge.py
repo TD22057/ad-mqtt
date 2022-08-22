@@ -40,6 +40,10 @@ class Bridge:
 
         mqtt.signal_connected.connect(self.mqtt_connected)
 
+    def reset_all_zones(self):
+        for zone_num in self.zones:
+            self.on_zone_restore(self.ad, zone_num)
+
     def mqtt_connected(self, device, connected):
         if not connected:
             return

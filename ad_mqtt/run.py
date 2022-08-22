@@ -30,8 +30,7 @@ def setup_logging(log_cfg):
         if log_cfg.file:
             log.addHandler(file_handler)
 
-
-def run(cfg, alarm_code, devices):
+def run(cfg, alarm_code, devices, restore_all=False):
     setup_logging(cfg.log)
 
     log = logging.getLogger(__name__)
@@ -54,6 +53,9 @@ def run(cfg, alarm_code, devices):
         loop = IM.network.poll.Manager()
         loop.add(ad_client, connected=False)
         loop.add(mqtt_client, connected=False)
+
+        if cfg.alarm.restore_on_startup:
+            bridge.reset_all_zones()
 
         while loop.active():
             loop.select()

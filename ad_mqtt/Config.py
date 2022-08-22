@@ -11,6 +11,8 @@ class Config:
         self.alarm = Data()
         self.alarm.host = '127.0.0.1'
         self.alarm.port = 1000
+        # Reset all zones to not faulted on startup
+        self.alarm.restore_on_startup = False
 
         # MQTT broker (names must match insteon-mqtt settings variables)
         self.mqtt = Data()

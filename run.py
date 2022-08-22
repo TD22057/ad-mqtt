@@ -10,6 +10,8 @@ cfg = AD.Config()
 # Alarm Decoder ser2sock server location.
 cfg.alarm.host = '127.0.0.1'
 cfg.alarm.port = 10000
+# To reset all zones to closed (not faulted) on startup, set this to True
+cfg.alarm.restore_on_startup = False
 
 # MQTT Broker connection
 cfg.mqtt.broker = '127.0.0.1'
