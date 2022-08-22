@@ -280,7 +280,7 @@ class Bridge:
         serial = int(msg.serial_number)
         info = self.rf_devices.get(serial)
         if info is None:
-            LOG.debug("Ignoring unknown RF serial number %s", msg.serial_number)
+            LOG.debug("Ignoring unknown RF serial no %s", msg.serial_number)
             return
 
         LOG.info("on_rfx_message serial=%s value=%s battery=%s supervision=%s "
@@ -292,8 +292,7 @@ class Bridge:
             is_low_battery = bool(msg.value & 0x02)
             battery_payload = {"status" : 10 if is_low_battery else 100}
 
-
-        for i, loop in enumerate( info.loops ):
+        for i, loop in enumerate(info.loops):
             if not loop:
                 continue
 
@@ -311,10 +310,6 @@ class Bridge:
                 self.on_zone_restore(dev, loop.zone)
 
             loop.faulted = msg.loop[i]
-
-        # TODO: check loop and update sensor state.
-        # Need to map loop value to zone number and sensor info
-        # then check message.loop[loop_num] == True:fault, False:clear
 
     def on_open(self, dev):
         LOG.info("on_open")

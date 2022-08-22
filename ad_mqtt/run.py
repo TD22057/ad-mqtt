@@ -6,6 +6,7 @@ from .Client import Client
 from . import Devices
 from .Discovery import Discovery
 
+
 def setup_logging(log_cfg):
     fmt = '%(asctime)s.%(msecs)03d %(levelname)s %(module)s: %(message)s'
     datefmt = '%Y-%m-%d %H:%M:%S'
@@ -16,8 +17,9 @@ def setup_logging(log_cfg):
         screen_handler.setFormatter(formatter)
 
     if log_cfg.file:
-        file_handler = logging.handlers.RotatingFileHandler(log_cfg.file,
-            maxBytes=log_cfg.size_kb*1000, backupCount=log_cfg.backup_count)
+        file_handler = logging.handlers.RotatingFileHandler(
+            log_cfg.file, maxBytes=log_cfg.size_kb * 1000,
+            backupCount=log_cfg.backup_count)
         file_handler.setFormatter(formatter)
 
     for name in log_cfg.modules:
@@ -42,7 +44,7 @@ def run(cfg, alarm_code, devices):
         decoder = AD.AlarmDecoder(ad_client)
         decoder._wire_events()
 
-        mqtt_client = IM.network.Mqtt( id="ad-mqtt" )
+        mqtt_client = IM.network.Mqtt(id="ad-mqtt")
         # IM uses dict: cfg['a'] not cfg.a
         mqtt_client.load_config(cfg.mqtt.__dict__)
 

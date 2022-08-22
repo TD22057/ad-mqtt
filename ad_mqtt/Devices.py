@@ -7,9 +7,9 @@ def init_devices(devices):
             zones[d.zone] = d
         else:
             rf_devices[d.id] = d
-            for l in d.loops:
-                if l is not None:
-                    zones[l.zone] = l
+            for loop in d.loops:
+                if loop is not None:
+                    zones[loop.zone] = loop
 
     return zones, rf_devices
 
@@ -29,7 +29,7 @@ class Zone:
 class Rf:
     def __init__(self, id, loops):
         self.id = int(id)
-        self.loops = [None]*4
+        self.loops = [None] * 4
         for i, l in enumerate(loops):
             self.loops[i] = l
             l.has_battery = True
@@ -47,9 +47,10 @@ class_keywords = {
     "window" : "window",
     }
 
+
 def guess_class(labels):
-    for l in labels:
-        s = l.lower()
+    for lbl in labels:
+        s = lbl.lower()
         for k, v in class_keywords.items():
             if k in s:
                 return v

@@ -3,6 +3,7 @@ import logging
 
 LOG = logging.getLogger(__name__)
 
+
 class Discovery:
     def __init__(self, mqtt, bridge, zones):
         self.mqtt = mqtt
@@ -166,7 +167,7 @@ class Discovery:
         if not self.messages:
             return
 
-        LOG.info( "Discovery publish for %d messages", len( self.messages ) )
+        LOG.info("Discovery publish for %d messages", len(self.messages))
 
         # Ideally we'd publish one, wait for an ack, then publish the next.
         # But this doesn't work because paho will throw an error if you
