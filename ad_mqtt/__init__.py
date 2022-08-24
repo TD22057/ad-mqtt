@@ -1,7 +1,7 @@
 
 # flake8: noqa
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 from .Bridge import Bridge
 from .Client import Client
