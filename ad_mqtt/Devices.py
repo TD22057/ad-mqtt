@@ -32,7 +32,8 @@ class Rf:
         self.loops = [None] * 4
         for i, l in enumerate(loops):
             self.loops[i] = l
-            l.has_battery = True
+            if l:
+                l.has_battery = True
 
 
 class RfZone (Rf):
