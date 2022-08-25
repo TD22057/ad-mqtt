@@ -3,7 +3,7 @@ def init_devices(devices):
     zones, rf_devices = {}, {}
 
     for d in devices:
-        if not isinstance(d, RfZone):
+        if not isinstance(d, Rf):
             zones[d.zone] = d
         else:
             rf_devices[d.id] = d
@@ -28,6 +28,7 @@ class Zone:
 
 class Rf:
     def __init__(self, id, loops):
+        assert len(loops) <= 4
         self.id = int(id)
         self.loops = [None] * 4
         for i, l in enumerate(loops):
