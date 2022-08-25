@@ -1,6 +1,6 @@
 
 
-Version: 0.2.1
+Version: 0.2.2
 
 ```
 git clone https://github.com/TD22057/ad-mqtt.git
