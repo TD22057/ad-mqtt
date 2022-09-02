@@ -137,7 +137,14 @@ class Bridge:
                 topic_args["entity"] = zone.entity
                 payload_args["zone_num"] = zone.zone
 
-        topic_str = topic.format(**topic_args)
+        try:
+            topic_str = topic.format(**topic_args)
+        except:
+            LOG.exception("Error in MQTT topic formatting.\n"
+                          "Topic: '%s'\nArgs: %s\nMessage: %s", topic,
+                          topic_args, message)
+            return
+
         payload = json.dumps(payload_args)
         LOG.info("Publish '%s' = %s", topic_str, payload)
         self.mqtt.publish(topic_str, payload, qos=self.qos, retain=self.retain)
