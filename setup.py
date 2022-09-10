@@ -8,7 +8,7 @@ test_requirements = open("requirements-test.txt").readlines()
 
 setuptools.setup(
     name = 'ad-mqtt',
-    version = '0.2.3',
+    version = '0.3.0',
     description = "Alarm Decoder <-> MQTT bridge server",
     long_description = readme,
     author = "Ted Drain",
