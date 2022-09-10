@@ -1,13 +1,14 @@
 
+[![Docker Image CI](https://github.com/rgriffogoes/ad-mqtt/actions/workflows/docker-image.yml/badge.svg)](https://github.com/rgriffogoes/ad-mqtt/actions/workflows/docker-image.yml)
 
-##### AlarmDecoder to MQTT Bridge (ad-mqtt)
+#### AlarmDecoder to MQTT Bridge (ad-mqtt)
 
 Simple Python application to interface [AlarmDecoder](https://github.com/nutechsoftware/alarmdecoder) with a [MQTT Broker](https://en.wikipedia.org/wiki/MQTT).
 
-Designed to work with Home Assistant.  Uses MQTT discovery to create sensors 
-for all zones and the alarm panel automatically.  Times are passed in the
-MQTT messages and retained so they can be used to create real "last changed"
-time sensors if desired in HASS.
+Designed to work with [Home Assistant](https://www.home-assistant.io/).  
+Uses MQTT discovery to create sensors for all zones and the alarm panel
+automatically.  Times are passed in the MQTT messages and retained so they
+can be used to create real "last changed" time sensors if desired in HASS.
 
 ##### Direct python execution
 ```
@@ -40,6 +41,7 @@ Check run.py for available environment variables.
  - Environment variables for major configurations
  - External zone config file
  - Dockerfile for containerized execution
+ - Github workflow to build and push docker image
 
 ###### Version: 0.2.3
  - Initial changelog recording
