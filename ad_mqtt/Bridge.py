@@ -132,6 +132,7 @@ class Bridge:
                 zone = self.zones.get(zone_num)
                 if not zone:
                     LOG.error("Skipping unknown zone %s", zone_num)
+                    return
 
             if zone:
                 topic_args["entity"] = zone.entity
