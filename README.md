@@ -22,7 +22,7 @@ edit devices.py to add zone info]
 ./run.py
 ```
 
-##### Docker Execution
+##### Direct Docker Execution
 Example docker execution with some parameters passed as environment vars. 
 Please notice the mandatory devices.py mapping.
 
@@ -30,10 +30,32 @@ Please notice the mandatory devices.py mapping.
 sudo docker run -e ADMQTT_SOCKET_HOST=192.168.1.71  
   -e ADMQTT_MQTT_HOST=192.168.1.6 
   -e ADMQTT_LOG_LEVEL=DEBUG 
+  -e ADMQTT_ALARM_CODE=4321
   -v /home/user/devices.py:/home/devices.py -d ad-mqtt:latest
 ```
 Use devices.py file in this repo as example file for configuring your zones.
 Check run.py for available environment variables.
+
+##### Docker Compose
+Example docker compose file:
+```
+
+version: "3"
+services:
+  ad-mqtt:
+    image: rgriffogoes/ad-mqtt:latest
+    container_name: ad-mqtt
+    environment:
+      - ADMQTT_SOCKET_HOST=192.168.1.71
+      - ADMQTT_MQTT_HOST=192.168.1.6
+      - ADMQTT_LOG_LEVEL=DEBUG
+      - ADMQTT_ALARM_CODE=4321
+    volumes:
+      - /mnt/data/docker-data/ad-mqtt-data/devices.py:/home/devices.py
+    restart: unless-stopped
+
+```
+Note device.py mounting and environment parameters.
 
 ##### Changelog
 
@@ -42,6 +64,7 @@ Check run.py for available environment variables.
  - External zone config file
  - Dockerfile for containerized execution
  - Github workflow to build and push docker image
+ - Updating README to include further instruction, descripiton and changelog
 
 ###### Version: 0.2.3
  - Initial changelog recording
