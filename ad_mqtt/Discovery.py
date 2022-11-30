@@ -1,6 +1,8 @@
 import json
 import logging
+from ad_mqtt import __version__
 
+version = __version__
 LOG = logging.getLogger(__name__)
 
 
@@ -36,6 +38,7 @@ class Discovery:
             'json_attributes_topic' : bridge.panel_state_topic,
             'json_attributes_template' : attr_templ,
             'qos' : 1,
+            'device':{'identifiers':['ad-mqtt'],'name':'ad-mqtt','model':'AlarmDecoder <-> MQTT Bridge','manufacturer':'TD22057','sw_version': version},
             }
         self.messages.append((topic, payload))
 
@@ -49,6 +52,7 @@ class Discovery:
             'value_template' : '{{value_json.status}}',
             'unit_of_measurement': '%',
             'device_class' : 'battery',
+            'device':{'identifiers':['ad-mqtt'],'name':'ad-mqtt','model':'AlarmDecoder <-> MQTT Bridge','manufacturer':'TD22057','sw_version': version},
             }
         self.messages.append((topic, payload))
 
@@ -60,6 +64,7 @@ class Discovery:
             'unique_id' : "admqtt_alarm_panel_bypass",
             'state_topic' : bridge.panel_bypass_topic,
             'value_template' : '{{value_json.status}}',
+            'device':{'identifiers':['ad-mqtt'],'name':'ad-mqtt','model':'AlarmDecoder <-> MQTT Bridge','manufacturer':'TD22057','sw_version': version},
             }
         self.messages.append((topic, payload))
 
@@ -80,6 +85,7 @@ class Discovery:
             'json_attributes_template' :
                ('{ "zone_num" : {{value_json.zone_num}},'
                  '"entity" : "{{value_json.entity}}" }'),
+            'device':{'identifiers':['ad-mqtt'],'name':'ad-mqtt','model':'AlarmDecoder <-> MQTT Bridge','manufacturer':'TD22057','sw_version': version},
             }
         self.messages.append((topic, payload))
 
@@ -93,6 +99,7 @@ class Discovery:
             'value_template' : '{{value_json.status}}',
             'json_attributes_topic' : bridge.panel_msg_topic,
             'json_attributes_template' : '{ "time" : "{{value_json.time}}" }',
+            'device':{'identifiers':['ad-mqtt'],'name':'ad-mqtt','model':'AlarmDecoder <-> MQTT Bridge','manufacturer':'TD22057','sw_version': version},
             }
         self.messages.append((topic, payload))
 
@@ -106,6 +113,7 @@ class Discovery:
             'value_template' : '{{value_json.status}}',
             'command_topic' : bridge.chime_set_topic,
             'qos' : 1,
+            'device':{'identifiers':['ad-mqtt'],'name':'ad-mqtt','model':'AlarmDecoder <-> MQTT Bridge','manufacturer':'TD22057','sw_version': version},
             }
         self.messages.append((topic, payload))
 
@@ -120,6 +128,7 @@ class Discovery:
             'command_topic' : bridge.bypass_set_topic,
             'qos' : 1,
             'retain' : True,
+            'device':{'identifiers':['ad-mqtt'],'name':'ad-mqtt','model':'AlarmDecoder <-> MQTT Bridge','manufacturer':'TD22057','sw_version': version},
             }
         self.messages.append((topic, payload))
 
@@ -139,6 +148,7 @@ class Discovery:
                 'value_template' : '{{value_json.status}}',
                 'json_attributes_topic' : state_topic,
                 'json_attributes_template' : attr_templ,
+                'device':{'identifiers':['ad-mqtt'],'name':'ad-mqtt','model':'AlarmDecoder <-> MQTT Bridge','manufacturer':'TD22057','sw_version': version},
                 }
             if z.device_class is not None:
                 payload['device_class'] = z.device_class
@@ -160,6 +170,7 @@ class Discovery:
                     'device_class' : 'battery',
                     'json_attributes_topic' : state_topic,
                     'json_attributes_template' : attr_templ,
+                    'device':{'identifiers':['ad-mqtt'],'name':'ad-mqtt','model':'AlarmDecoder <-> MQTT Bridge','manufacturer':'TD22057','sw_version': version},
                     }
                 self.messages.append((topic, payload))
 
