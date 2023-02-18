@@ -1,5 +1,6 @@
 
 [![Docker Image CI](https://github.com/rgriffogoes/ad-mqtt/actions/workflows/docker-image.yml/badge.svg)](https://github.com/rgriffogoes/ad-mqtt/actions/workflows/docker-image.yml)
+[![codeql](https://github.com/rgriffogoes/ad-mqtt/actions/workflows/codeql.yml/badge.svg)](https://github.com/rgriffogoes/ad-mqtt/actions/workflows/codeql.yml)
 
 #### AlarmDecoder to MQTT Bridge (ad-mqtt)
 
@@ -58,6 +59,10 @@ services:
 Note device.py mounting and environment parameters.
 
 ##### Changelog
+
+###### Version: 0.3.1
+ - Adding Device attribute in discovery (sn3ak)
+ - Adding codeql in repo workflow
 
 ###### Version: 0.3.0
  - Environment variables for major configurations
