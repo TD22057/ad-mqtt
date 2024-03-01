@@ -289,7 +289,7 @@ class Bridge:
 
     def on_rfx_message(self, dev, message):
         msg = message
-        serial = int(msg.serial_number)
+        serial = str(msg.serial_number)
         info = self.rf_devices.get(serial)
         if info is None:
             LOG.debug("Ignoring unknown RF serial no %s", msg.serial_number)

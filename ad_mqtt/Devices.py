@@ -29,7 +29,7 @@ class Zone:
 class Rf:
     def __init__(self, id, loops):
         assert len(loops) <= 4
-        self.id = int(id)
+        self.id = str(id)
         self.loops = [None] * 4
         for i, l in enumerate(loops):
             self.loops[i] = l
