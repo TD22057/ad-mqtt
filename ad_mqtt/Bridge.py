@@ -132,6 +132,7 @@ class Bridge:
                 zone = self.zones.get(zone_num)
                 if not zone:
                     LOG.error("Skipping unknown zone %s", zone_num)
+                    return
 
             if zone:
                 topic_args["entity"] = zone.entity
@@ -141,8 +142,7 @@ class Bridge:
             topic_str = topic.format(**topic_args)
         except:
             LOG.exception("Error in MQTT topic formatting.\n"
-                          "Topic: '%s'\nArgs: %s\nMessage: %s", topic,
-                          topic_args, message)
+                          "Topic: '%s'\nArgs: %s", topic, topic_args)
             return
 
         payload = json.dumps(payload_args)
@@ -200,7 +200,7 @@ class Bridge:
 
         info = self.zones.get(zone)
         if info:
-            LOG.debug("Setting zone %d = True", zone )
+            LOG.debug("Setting zone %s = True", zone )
             info.faulted = True
 
         payload = {"status" : "ON"}
@@ -211,7 +211,7 @@ class Bridge:
         LOG.info("on_zone_restored %s", zone)
         info = self.zones.get(zone)
         if info:
-            LOG.debug("Setting zone %d = False", zone )
+            LOG.debug("Setting zone %s = False", zone )
             info.faulted = False
 
         payload = {"status" : "OFF"}
@@ -322,7 +322,7 @@ class Bridge:
             else:
                 self.on_zone_restore(dev, loop.zone)
 
-            LOG.debug("Setting zone %d loop %d = %s", loop.zone, i,
+            LOG.debug("Setting zone %s loop %s = %s", loop.zone, i,
                       msg.loop[i] )
             loop.faulted = msg.loop[i]
 
