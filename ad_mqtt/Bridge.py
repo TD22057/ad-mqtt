@@ -200,6 +200,7 @@ class Bridge:
 
         info = self.zones.get(zone)
         if info:
+            LOG.debug("Setting zone %d = True", zone )
             info.faulted = True
 
         payload = {"status" : "ON"}
@@ -210,6 +211,7 @@ class Bridge:
         LOG.info("on_zone_restored %s", zone)
         info = self.zones.get(zone)
         if info:
+            LOG.debug("Setting zone %d = False", zone )
             info.faulted = False
 
         payload = {"status" : "OFF"}
@@ -320,6 +322,8 @@ class Bridge:
             else:
                 self.on_zone_restore(dev, loop.zone)
 
+            LOG.debug("Setting zone %d loop %d = %s", loop.zone, i,
+                      msg.loop[i] )
             loop.faulted = msg.loop[i]
 
     def on_open(self, dev):

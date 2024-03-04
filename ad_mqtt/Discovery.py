@@ -1,10 +1,19 @@
 import json
 import logging
+from . import version
 
 LOG = logging.getLogger(__name__)
 
 
 class Discovery:
+    device = {
+       'identifiers' : ['ad-mqtt'],
+       'name' : 'ad-mqtt',
+       'model' : 'AlarmDecoder <-> MQTT Bridge',
+       'manufacturer' : 'TD22057',
+       'sw_version' : version.__version__,
+       }
+    
     def __init__(self, mqtt, bridge, zones):
         self.mqtt = mqtt
         mqtt.signal_connected.connect(self.mqtt_connected)
@@ -22,6 +31,7 @@ class Discovery:
         payload = {
             'object_id' : 'alarm_panel_mqtt',
             'unique_id' : 'admqtt_alarm_panel',
+            'device' : Discovery.device,
             'state_topic' : bridge.panel_state_topic,
             'value_template' : '{{value_json.status}}',
             'availability_topic' : 'alarm/available',
@@ -45,6 +55,7 @@ class Discovery:
             'name' : "Alarm Panel Battery",
             'object_id' : "alarm_panel_battery",
             'unique_id' : "admqtt_alarm_panel_battery",
+            'device' : Discovery.device,
             'state_topic' : bridge.panel_battery_topic,
             'value_template' : '{{value_json.status}}',
             'unit_of_measurement': '%',
@@ -58,6 +69,7 @@ class Discovery:
             'name' : "Alarm Panel Bypass",
             'object_id' : "alarm_panel_bypass",
             'unique_id' : "admqtt_alarm_panel_bypass",
+            'device' : Discovery.device,
             'state_topic' : bridge.panel_bypass_topic,
             'value_template' : '{{value_json.status}}',
             }
@@ -73,6 +85,7 @@ class Discovery:
             'name' : 'Alarm Faulted Zone',
             'object_id' : 'alarm_panel_faulted',
             'unique_id' : 'admqtt_alarm_panel_faulted',
+            'device' : Discovery.device,
             'icon' : 'mdi:alarm-check',
             'state_topic' : bridge.panel_faulted_topic,
             'value_template' : '{{value_json.status}}',
@@ -88,6 +101,7 @@ class Discovery:
             'name' : 'Alarm Panel Message',
             'object_id' : 'alarm_panel_message',
             'unique_id' : 'admqtt_alarm_panel_message',
+            'device' : Discovery.device,
             'icon' : 'mdi:alarm-check',
             'state_topic' : bridge.panel_msg_topic,
             'value_template' : '{{value_json.status}}',
@@ -101,6 +115,7 @@ class Discovery:
             'name' : 'Alarm Chime',
             'object_id' : 'alarm_panel_chime',
             'unique_id' : 'admqtt_alarm_panel_chime',
+            'device' : Discovery.device,
             'icon' : 'mdi:bell-ring',
             'state_topic' : bridge.chime_state_topic,
             'value_template' : '{{value_json.status}}',
@@ -114,6 +129,7 @@ class Discovery:
             'name' : 'Alarm Bypass',
             'object_id' : 'alarm_panel_bypass',
             'unique_id' : 'admqtt_alarm_panel_bypass',
+            'device' : Discovery.device,
             'icon' : 'mdi:bell-ring',
             'state_topic' : bridge.bypass_state_topic,
             'value_template' : '{{value_json.status}}',
@@ -135,6 +151,7 @@ class Discovery:
                 'name' : z.label,
                 'object_id' : z.entity,
                 'unique_id' : z.unique_id,
+                'device' : Discovery.device,
                 'state_topic' : state_topic,
                 'value_template' : '{{value_json.status}}',
                 'json_attributes_topic' : state_topic,
@@ -154,6 +171,7 @@ class Discovery:
                     'name' : z.label + ' Battery',
                     'object_id' : bat_entity,
                     'unique_id' : bat_unique_id,
+                    'device' : Discovery.device,
                     'state_topic' : state_topic,
                     'value_template' : '{{value_json.status}}',
                     'unit_of_measurement': '%',
